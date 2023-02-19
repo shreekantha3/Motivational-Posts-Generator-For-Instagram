@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageChops, ImageEnhance
 import textwrap
 import os
+import subprocess
 
 # gives the background image a grayscale to allow easier reading of quote
 def apply_tint(im, tint_color):
