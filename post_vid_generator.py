@@ -110,25 +110,43 @@ def build_image(im_path, quote, im_count = '', logoify = True):
 	im.save('out/' + str(im_count) + "_" + str(quote[0:10]) + '.png')
 	print ("Output image saved as: " + 'out/' + str(im_count) + "_" + str(quote[0:10]) + '.png')
 
+# creates a video from a list of images
+def create_video(images, output_filename, fps):
+    input_files = ' '.join(images)
+    cmd = f'ffmpeg -y -r {fps} -i "{input_files}" -c:v libx264 -pix_fmt yuv420p "{output_filename}"'
+    subprocess.call(cmd, shell=True)
+
+
 
 def main():
-	dir_paths = os.listdir("in/raw")
-	im_paths = get_im_paths(dir_paths)
-	quotes = get_quotes("in/quotes.txt")
+    dir_paths = os.listdir("in/raw")
+    im_paths = get_im_paths(dir_paths)
+    quotes = get_quotes("in/quotes.txt")
 
-	combos = (input("Generate all combinations? (y/n): ") == 'y')
-	logoify = (input("Include trademark/logo? (y/n): ") == 'y')
+    combos = (input("Generate all combinations? (y/n): ") == 'y')
+    logoify = (input("Include trademark/logo? (y/n): ") == 'y')
+    fps = int(input("Enter the frames per second for the video: "))
 
-	if combos:
-		im_count = 0
-		for im_path in im_paths:
-			for quote in quotes:
-				print ("Overlaying " + str(im_path) + "...")
-				build_image('in/raw/' + im_path, quote, im_count, logoify)
-			im_count = im_count + 1
-	else:	
-		for i, im_path in enumerate(im_paths):
-			print ("Overlaying " + str(im_path) + "...")
-			build_image('in/raw/' + im_path, quotes[i], '', logoify)
+    image_paths = []
+    if combos:
+        im_count = 0
+        for im_path in im_paths:
+            for quote in quotes:
+                print("Overlaying " + str(im_path) + "...")
+                build_image('in/raw/' + im_path, quote, im_count, logoify)
+                image_paths.append(f'out/{im_count}_{quote[:10]}.png')
+            im_count += 1
+    else:
+        for i, im_path in enumerate(im_paths):
+            print("Overlaying " + str(im_path) + "...")
+            build_image('in/raw/' + im_path, quotes[i], '', logoify)
+            image_paths.append(f'out/{quotes[i][:10]}.png')
+
+    video_filename = input("Enter the output filename for the video (including extension): ")
+    create_video(image_paths, video_filename, fps)
+
+    print("Video saved as:", video_filename)
 
 main()
+
+
