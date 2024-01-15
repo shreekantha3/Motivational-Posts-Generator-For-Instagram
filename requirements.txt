@@ -1,0 +1,4 @@
+use pip3 if you are using python3
+
+pip3 install pillow
+

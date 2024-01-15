@@ -3,7 +3,10 @@
 #The user can choose to generate all possible combinations of images and quotes
 # or overlay images and quotes one by one.
 
+
 from PIL import Image, ImageDraw, ImageFont, ImageChops, ImageEnhance
+
+#from PIL import Image, ImageDraw, ImageFont, ImageChops, ImageEnhance
 import textwrap
 import os
 import subprocess
@@ -15,58 +18,136 @@ def apply_tint(im, tint_color):
 	return tinted_im
 
 # places the trademark logo at the bottom of the image (hardcoded placement)
+# def place_logo(bkg, logo, trademark, font):
+# 	bkg_width = 1080
+# 	bkg_height = 1080
+
+# 	# calculate the size of the logo
+# 	logo_width, logo_height = logo.size
+
+# 	# calculate the size of the trademark text
+# 	draw = ImageDraw.Draw(bkg)
+# 	text_width, text_height = draw.textsize(trademark, font=font)
+
+# 	# set a constant offset between the logo and the trademark text
+# 	spacing = 2
+
+# 	# calculate the position of the logo so that it always stays above the trademark text
+# 	x_position = int((bkg_width - logo_width) / 2)
+# 	y_position = bkg_height - logo_height - text_height
+
+# 	# paste the logo onto the background image
+# 	bkg.paste(logo, (x_position, y_position), logo)
+# 	return bkg
+
 def place_logo(bkg, logo, trademark, font):
-	bkg_width = 1080
-	bkg_height = 1080
+    bkg_width, bkg_height = bkg.size
 
-	# calculate the size of the logo
-	logo_width, logo_height = logo.size
+    # Calculate the size of the logo
+    logo_width, logo_height = logo.size
 
-	# calculate the size of the trademark text
-	draw = ImageDraw.Draw(bkg)
-	text_width, text_height = draw.textsize(trademark, font=font)
+    # Create an instance of the ImageFont class
+    font_instance = ImageFont.truetype("utils/tommy.otf", 52)
 
-	# set a constant offset between the logo and the trademark text
-	spacing = 2
+    # Get the bounding box of the trademark text
+    bbox = ImageDraw.Draw(bkg).textbbox((0, 0), trademark, font=font_instance)
+    text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
 
-	# calculate the position of the logo so that it always stays above the trademark text
-	x_position = int((bkg_width - logo_width) / 2)
-	y_position = bkg_height - logo_height - text_height
+    # Set a constant offset between the logo and the trademark text
+    spacing = 2
 
-	# paste the logo onto the background image
-	bkg.paste(logo, (x_position, y_position), logo)
-	return bkg
+    # Calculate the position of the logo so that it always stays above the trademark text
+    x_position = int((bkg_width - logo_width) / 2)
+    y_position = bkg_height - logo_height - text_height - spacing
+
+    # Paste the logo onto the background image
+    bkg.paste(logo, (x_position, y_position), logo)
+    return bkg
+
+
 
 # places the trademark logo at the bottom of the image (hardcoded placement)
+# def place_trademark(im, trademark, font):
+# 	draw = ImageDraw.Draw(im)
+# 	bbox =  im.getbbox()
+# 	W = bbox[2]
+# 	H = bbox[3]
+# 	text_width, text_height = draw.textsize(trademark, font=font)
+# 	x = (W - text_width) / 2
+# 	y = 1010
+# 	draw.text((x, y), trademark, font=font)
+# 	return im
+
 def place_trademark(im, trademark, font):
-	draw = ImageDraw.Draw(im)
-	bbox =  im.getbbox()
-	W = bbox[2]
-	H = bbox[3]
-	text_width, text_height = draw.textsize(trademark, font=font)
-	x = (W - text_width) / 2
-	y = 1010
-	draw.text((x, y), trademark, font=font)
-	return im
+    draw = ImageDraw.Draw(im)
+    bbox = im.getbbox()
+    W, H = bbox[2], bbox[3]
+
+    # Create an instance of the ImageFont class
+    font_instance = ImageFont.truetype("utils/tommy.otf", 52)
+
+    # Calculate the size of the trademark text
+    text_width, text_height = draw.textbbox((0, 0), trademark, font=font_instance)[2:4]
+
+    # Set a constant offset for the trademark text
+    spacing = 2
+
+    # Calculate the position of the trademark text
+    x = (W - text_width) / 2
+    y = H - text_height - spacing
+
+    # Draw the trademark text on the image
+    draw.text((x, y), trademark, font=font_instance)
+
+
+
 
 # places the quote in the centre of the image
-def place_quote(im, quote, font):
-	draw = ImageDraw.Draw(im)
-	w, h = draw.textsize(quote, font=font)
-	bbox =  im.getbbox()
-	W = bbox[2]; H = bbox[3]
+# def place_quote(im, quote, font):
+# 	draw = ImageDraw.Draw(im)
+# 	w, h = draw.textsize(quote, font=font)
+# 	bbox =  im.getbbox()
+# 	W = bbox[2]; H = bbox[3]
 
-	# determine the number of lines needed to fit the quote on the image
-	lines = textwrap.wrap(quote, width=24)
-	n_lines = len(lines)
-	pad = -10
+# 	# determine the number of lines needed to fit the quote on the image
+# 	lines = textwrap.wrap(quote, width=24)
+# 	n_lines = len(lines)
+# 	pad = -10
  
- 	# place the lines of the quotes one on top of the other
-	current_h = H/2 - (n_lines*h/2)
-	for line in lines:
-		w, h = draw.textsize(line, font=font)
-		draw.text(((W - w) / 2, current_h), line, font=font)
-		current_h += h + pad
+#  	# place the lines of the quotes one on top of the other
+# 	current_h = H/2 - (n_lines*h/2)
+# 	for line in lines:
+# 		w, h = draw.textsize(line, font=font)
+# 		draw.text(((W - w) / 2, current_h), line, font=font)
+# 		current_h += h + pad
+
+
+def place_quote(im, quote, font):
+    draw = ImageDraw.Draw(im)
+    bbox = im.getbbox()
+    W, H = bbox[2], bbox[3]
+
+    # Create an instance of the ImageFont class
+    font_instance = ImageFont.truetype("utils/BebasNeue.otf", 115)
+
+    # Determine the number of lines needed to fit the quote on the image
+    lines = textwrap.wrap(quote, width=24)
+    n_lines = len(lines)
+    pad = -10
+    line_spacing = 20  # Adjust this value to set the gap between lines
+
+    # Place the lines of the quotes one on top of the other
+    current_h = H / 2 - (n_lines * draw.textbbox((0, 0), lines[0], font=font_instance)[3] / 2)
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font_instance)
+        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        draw.text(((W - w) / 2, current_h), line, font=font_instance)
+        current_h += h + pad + line_spacing  # Add line spacing here
+
+
+
+
+
 
 # determine is the given path is an image
 def is_img(path):
